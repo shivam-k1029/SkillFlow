@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Journey: Desktop Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(10px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        /* Hotspot Styling - Optimized for Desktop */
+        .hotspot {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 60;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: pulse-red 2s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .hotspot:hover { transform: scale(1.1); }
+        
+        .hotspot.solution {
+            background-color: #22c55e;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        /* Toggle Slider */
+        .mode-toggle {
+            position: relative;
+            display: inline-flex;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 4px;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+        }
+        .mode-toggle input { display: none; }
+        .mode-label {
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .mode-toggle input:not(:checked) ~ .mode-label:first-of-type {
+            background-color: white;
+            color: #ef4444;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .mode-toggle input:checked ~ .mode-label:last-of-type {
+            background-color: white;
+            color: #22c55e;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Nav Item Styles */
+        .nav-item {
+            position: relative;
+            padding-bottom: 2px;
+        }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -21px; /* Align with border */
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #7c3aed;
+            border-radius: 3px 3px 0 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col overflow-hidden">
+
+    <!-- DEMO CONTROLLER TOP BAR -->
+    <div class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 fixed top-0 w-full z-[100] shadow-sm">
+        <!-- Left: Logo & Title -->
+        <div class="flex items-center space-x-4">
+            <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">V</div>
+            <span class="font-bold text-slate-800">Student Journey <span class="text-slate-400 font-normal">| Desktop View</span></span>
+        </div>
+
+        <!-- Center: Stage Navigation -->
+        <div class="flex space-x-8">
+            <button onclick="setStage(0)" class="nav-item text-sm font-semibold text-slate-500 hover:text-violet-600 transition-colors" id="nav-0">0. Home</button>
+            <button onclick="setStage(1)" class="nav-item text-sm font-semibold text-slate-500 hover:text-violet-600 transition-colors" id="nav-1">1. Sign Up</button>
+            <button onclick="setStage(2)" class="nav-item text-sm font-semibold text-slate-500 hover:text-violet-600 transition-colors" id="nav-2">2. Login</button>
+            <button onclick="setStage(3)" class="nav-item text-sm font-semibold text-slate-500 hover:text-violet-600 transition-colors" id="nav-3">3. Dashboard</button>
+            <button onclick="setStage(4)" class="nav-item text-sm font-semibold text-slate-500 hover:text-violet-600 transition-colors" id="nav-4">4. Course Player</button>
+        </div>
+
+        <!-- Right: Toggles -->
+        <div class="flex items-center space-x-6">
+            <!-- Mode Toggle -->
+            <label class="mode-toggle">
+                <input type="checkbox" id="ux-mode-toggle">
+                <div class="mode-label">Current Reality 🔴</div>
+                <div class="mode-label">The Solution 🟢</div>
+            </label>
+
+            <!-- Hotspot Toggle -->
+            <div class="flex items-center space-x-2 border-l pl-6 border-slate-200">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Explain UX</span>
+                <input type="checkbox" id="hotspot-toggle" class="w-5 h-5 accent-violet-600 cursor-pointer">
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP VIEWPORT -->
+    <div id="app-viewport" class="mt-16 w-full h-[calc(100vh-64px)] overflow-y-auto bg-slate-50 relative">
+        <!-- Dynamic content injected here -->
+    </div>
+
+    <!-- Insight Modal -->
+    <div id="insight-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl w-full max-w-lg transform transition-all scale-100 animate-fadeIn">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-xs font-bold px-3 py-1 rounded-full uppercase" id="modal-tag">Problem</span>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <h3 class="font-bold text-2xl text-slate-900 mb-3" id="modal-title">Title</h3>
+            <p class="text-base text-slate-600 leading-relaxed" id="modal-desc">Description</p>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // --- STAGE DATA (DESKTOP LAYOUTS) ---
+        const stages = {
+            0: { // Landing Page
+                problemHTML: `
+                    <div class="flex flex-col min-h-full fade-in bg-white">
+                        <div class="hotspot top-[40%] right-[20%] hidden" onclick="showInsight('problem', 'The Generic Portal', 'A homepage that just says \\'Welcome\\' fails to inspire. It treats the user like a number in a database, not a person with a goal.')">?</div>
+                        
+                        <!-- Boring Nav -->
+                        <div class="border-b p-4 flex justify-between items-center bg-slate-800 text-white">
+                            <div class="font-bold">University LMS</div>
+                            <div class="space-x-4 text-sm">
+                                <span class="opacity-70">About</span>
+                                <span class="opacity-70">Academics</span>
+                                <span class="opacity-70">Admissions</span>
+                                <button class="border border-white px-3 py-1 rounded">Login</button>
+                            </div>
+                        </div>
+
+                        <!-- Hero -->
+                        <div class="bg-slate-100 flex-1 flex items-center justify-center p-20 text-center">
+                            <div class="max-w-2xl">
+                                <h1 class="text-4xl font-bold text-slate-800 mb-4">Welcome to the Learning Portal</h1>
+                                <p class="text-slate-500 mb-8">Access over 500+ courses, 2000+ quizzes, and connect with faculty members online. Please log in or register to continue.</p>
+                                <button onclick="setStage(1)" class="bg-blue-600 text-white px-8 py-3 rounded font-bold hover:bg-blue-700">Enter Portal</button>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                solutionHTML: `
+                    <div class="flex flex-col min-h-full fade-in bg-white relative overflow-hidden">
+                         <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-green-50 to-transparent pointer-events-none"></div>
+                         
+                         <div class="hotspot solution top-[40%] left-[20%] hidden" onclick="showInsight('solution', 'Value-Driven Hook', 'We replace generic text with a promise: \\'Master a skill.\\' This speaks directly to the user\\'s motivation.')">?</div>
+
+                        <!-- Modern Nav -->
+                        <div class="p-6 flex justify-between items-center max-w-7xl mx-auto w-full z-10">
+                            <div class="flex items-center space-x-2 text-green-700 font-bold text-xl">
+                                <i data-lucide="zap" class="fill-current"></i> <span>SkillFlow</span>
+                            </div>
+                            <button onclick="setStage(2)" class="text-slate-600 font-medium hover:text-green-700">Log In</button>
+                        </div>
+
+                        <!-- Hero -->
+                        <div class="flex-1 flex items-center justify-center p-10 z-10">
+                            <div class="grid grid-cols-2 gap-12 max-w-6xl w-full items-center">
+                                <div>
+                                    <div class="inline-block bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full mb-6">New: AI Career Tracks</div>
+                                    <h1 class="text-6xl font-extrabold text-slate-900 mb-6 leading-tight">Learn the one skill that gets you <span class="text-green-600">hired.</span></h1>
+                                    <p class="text-lg text-slate-500 mb-8 max-w-md">Stop browsing aimlessly. Pick a career path, stick to a 7-day plan, and see real results.</p>
+                                    <div class="flex space-x-4">
+                                        <button onclick="setStage(1)" class="bg-green-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all transform hover:-translate-y-1">Start Learning Now</button>
+                                        <button class="px-8 py-4 rounded-xl font-bold text-slate-600 hover:bg-slate-50">View Syllabus</button>
+                                    </div>
+                                    <div class="mt-8 flex items-center space-x-4 text-sm text-slate-400">
+                                        <div class="flex -space-x-2">
+                                            <div class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white"></div>
+                                            <div class="w-8 h-8 rounded-full bg-slate-300 border-2 border-white"></div>
+                                            <div class="w-8 h-8 rounded-full bg-slate-400 border-2 border-white"></div>
+                                        </div>
+                                        <span>Join 10,000+ students today</span>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute -inset-4 bg-green-200 rounded-full blur-3xl opacity-30"></div>
+                                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80" class="relative rounded-2xl shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            1: { // Sign Up
+                problemHTML: `
+                    <div class="flex items-center justify-center min-h-full p-10 fade-in bg-slate-100">
+                        <div class="hotspot top-[20%] right-[30%] hidden" onclick="showInsight('problem', 'The False Hope Trap', 'Presenting too many options causes decision paralysis. The user selects everything, feels overwhelmed later, and quits.')">?</div>
+                        
+                        <div class="bg-white w-full max-w-5xl h-[600px] rounded-2xl shadow-xl flex overflow-hidden border border-slate-200">
+                            <!-- Left: Image -->
+                            <div class="w-1/3 bg-slate-900 flex flex-col justify-center p-12 text-white">
+                                <h1 class="text-3xl font-bold mb-4">Create your account.</h1>
+                                <p class="text-slate-400">Access 500+ courses instantly.</p>
+                            </div>
+                            <!-- Right: The Cluttered Form -->
+                            <div class="w-2/3 p-16 overflow-y-auto relative">
+                                <h2 class="text-2xl font-bold text-slate-900 mb-2">What are your interests?</h2>
+                                <p class="text-slate-500 mb-8">Select all that apply to personalize your feed.</p>
+                                
+                                <div class="grid grid-cols-3 gap-4 mb-8">
+                                    <div class="border p-4 rounded-xl bg-blue-50 border-blue-200 text-blue-700 font-medium text-center cursor-pointer">Python ✅</div>
+                                    <div class="border p-4 rounded-xl bg-blue-50 border-blue-200 text-blue-700 font-medium text-center cursor-pointer">Java ✅</div>
+                                    <div class="border p-4 rounded-xl bg-blue-50 border-blue-200 text-blue-700 font-medium text-center cursor-pointer">React ✅</div>
+                                    <div class="border p-4 rounded-xl bg-blue-50 border-blue-200 text-blue-700 font-medium text-center cursor-pointer">Design ✅</div>
+                                    <div class="border p-4 rounded-xl bg-blue-50 border-blue-200 text-blue-700 font-medium text-center cursor-pointer">Marketing ✅</div>
+                                    <div class="border p-4 rounded-xl bg-blue-50 border-blue-200 text-blue-700 font-medium text-center cursor-pointer">SEO ✅</div>
+                                </div>
+                                
+                                <button onclick="setStage(2)" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold text-lg hover:bg-slate-900 transition-colors">Continue (6 Selected)</button>
+                                <p class="text-sm text-red-500 mt-4 text-center">⚠️ Result: Dashboard will be flooded.</p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                solutionHTML: `
+                    <div class="flex flex-col items-center justify-center min-h-full p-8 fade-in bg-slate-50 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-emerald-600"></div>
+                        <div class="hotspot solution top-[15%] right-[25%] hidden" onclick="showInsight('solution', 'The Singular Focus', 'By forcing the user to pick ONE primary goal, we create a clear, manageable path. We also show a \\'Week 1 Preview\\' to prove it is doable.')">?</div>
+
+                        <div class="text-center mb-10 max-w-2xl">
+                            <h2 class="text-4xl font-extrabold text-slate-900 mb-4">Let's set a realistic pace.</h2>
+                            <p class="text-slate-500 text-lg">Pick <strong>one</strong> skill to focus on for your first 7 days.</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full">
+                            <!-- Card 1: Python -->
+                            <div class="group relative bg-white border-2 border-slate-100 hover:border-green-500 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1" onclick="selectGoal(this, 'Python')">
+                                <div class="absolute -top-3 left-6 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">Most Popular</div>
+                                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-4 text-3xl group-hover:bg-green-50 transition-colors">🐍</div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-2">Learn Python</h3>
+                                <p class="text-sm text-slate-500 mb-6">Automate boring tasks.</p>
+                                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                    <p class="text-xs font-bold text-slate-400 uppercase mb-2">Week 1 Plan</p>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center text-xs text-slate-600"><i data-lucide="play-circle" class="w-3 h-3 mr-2 text-green-500"></i> 3 Short Videos</div>
+                                        <div class="flex items-center text-xs text-slate-600"><i data-lucide="code" class="w-3 h-3 mr-2 text-green-500"></i> Build "Hello World"</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Web Design -->
+                            <div class="group bg-white border-2 border-slate-100 hover:border-pink-500 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1" onclick="selectGoal(this, 'Web Design')">
+                                <div class="w-14 h-14 bg-pink-50 rounded-2xl flex items-center justify-center mb-4 text-3xl">🎨</div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-2">Web Design</h3>
+                                <p class="text-sm text-slate-500 mb-6">Create beautiful sites.</p>
+                                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                    <p class="text-xs font-bold text-slate-400 uppercase mb-2">Week 1 Plan</p>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center text-xs text-slate-600"><i data-lucide="play-circle" class="w-3 h-3 mr-2 text-pink-500"></i> Intro to Figma</div>
+                                        <div class="flex items-center text-xs text-slate-600"><i data-lucide="layout" class="w-3 h-3 mr-2 text-pink-500"></i> Design a Landing Page</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Data Science -->
+                            <div class="group bg-white border-2 border-slate-100 hover:border-indigo-500 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1" onclick="selectGoal(this, 'Data Science')">
+                                <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 text-3xl">📊</div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-2">Data Science</h3>
+                                <p class="text-sm text-slate-500 mb-6">Analyze real data.</p>
+                                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                    <p class="text-xs font-bold text-slate-400 uppercase mb-2">Week 1 Plan</p>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center text-xs text-slate-600"><i data-lucide="play-circle" class="w-3 h-3 mr-2 text-indigo-500"></i> Data Basics</div>
+                                        <div class="flex items-center text-xs text-slate-600"><i data-lucide="bar-chart" class="w-3 h-3 mr-2 text-indigo-500"></i> Analyze a CSV</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Commitment Bar -->
+                        <div id="commitment-bar" class="mt-10 bg-slate-900 text-white p-4 rounded-xl flex items-center justify-between max-w-2xl w-full shadow-2xl transform translate-y-10 opacity-0 transition-all duration-500">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-slate-900 font-bold"><i data-lucide="check" class="w-6 h-6"></i></div>
+                                <div>
+                                    <p class="font-bold text-sm">I'm committing to <span id="selected-goal-text" class="text-green-400">Python</span>.</p>
+                                    <p class="text-xs text-slate-400">Week 1 Goal: 15 mins / day</p>
+                                </div>
+                            </div>
+                            <button onclick="setStage(2)" class="bg-white text-slate-900 px-6 py-2 rounded-lg font-bold hover:bg-slate-100 transition-colors">Start Week 1</button>
+                        </div>
+                    </div>
+                `
+            },
+            2: { // Login
+                problemHTML: `
+                    <div class="flex items-center justify-center min-h-full fade-in bg-slate-100">
+                        <div class="hotspot top-[30%] left-[35%] hidden" onclick="showInsight('problem', 'The Barrier to Re-entry', 'Session timeouts are technical necessities but UX failures. Demanding a password from a demotivated user leads to drop-off.')">?</div>
+                        
+                        <div class="bg-white w-full max-w-md p-10 rounded-2xl shadow-lg border border-red-100 relative">
+                            <div class="absolute -top-4 left-0 w-full flex justify-center">
+                                <div class="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md flex items-center">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Session Expired
+                                </div>
+                            </div>
+
+                            <h2 class="text-2xl font-bold text-slate-900 mb-6 mt-2 text-center">Log In to Continue</h2>
+                            
+                            <form class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Password</label>
+                                    <input type="password" value="wrongpassword" class="w-full border-2 border-red-300 bg-red-50 rounded-lg p-3 text-slate-900">
+                                    <p class="text-xs text-red-500 mt-1">Incorrect password.</p>
+                                </div>
+                                <button type="button" class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-lg cursor-not-allowed">Log In</button>
+                            </form>
+                        </div>
+                    </div>
+                `,
+                solutionHTML: `
+                    <!-- We will inject content here via render() based on magicLinkSent state -->
+                `
+            },
+            3: { // Dashboard
+                problemHTML: `
+                    <div class="flex min-h-full fade-in">
+                         <!-- Sidebar -->
+                        <div class="w-64 bg-slate-900 text-slate-400 flex flex-col p-4 space-y-2">
+                             <div class="text-white font-bold text-xl mb-6 px-2">LMS Portal</div>
+                             <div class="p-2 bg-slate-800 text-white rounded">Dashboard</div>
+                             <div class="p-2 hover:bg-slate-800 rounded">My Courses</div>
+                             <div class="p-2 hover:bg-slate-800 rounded">Assignments <span class="bg-red-600 text-white text-xs px-1 ml-2 rounded">4</span></div>
+                        </div>
+                        
+                        <div class="flex-1 bg-slate-100 p-8">
+                            <div class="hotspot top-[100px] right-[100px] hidden" onclick="showInsight('problem', 'The Wall of Shame', 'Highlighting everything the user missed triggers \\'Avoidance Behavior\\'.')">?</div>
+                            
+                            <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+                                <h3 class="font-bold text-red-800 text-lg mb-4 flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2"></i> Action Required</h3>
+                                <ul class="space-y-3">
+                                    <li class="flex items-center text-red-700 bg-white p-3 rounded border border-red-100"><span class="font-bold mr-2">Overdue:</span> Python Quiz 3</li>
+                                </ul>
+                            </div>
+                            
+                             <h3 class="font-bold text-slate-700 mb-4">Enrolled Courses</h3>
+                             <div class="grid grid-cols-2 gap-6">
+                                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 opacity-70 cursor-pointer" onclick="setStage(4)">
+                                    <div class="h-40 bg-slate-200 rounded-lg mb-4"></div>
+                                    <h4 class="font-bold">Advanced Python</h4>
+                                    <p class="text-xs text-slate-400 mt-2">10% Complete</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                solutionHTML: `
+                    <div class="flex min-h-full fade-in bg-slate-50">
+                        <div class="w-20 lg:w-64 bg-white border-r border-slate-200 flex flex-col py-6">
+                            <div class="px-6 mb-10 flex items-center space-x-3 text-green-700">
+                                <i data-lucide="zap" class="w-8 h-8 fill-current"></i> <span class="font-bold text-xl hidden lg:block">SkillFlow</span>
+                            </div>
+                            <div class="space-y-1 px-3">
+                                <div class="flex items-center space-x-3 p-3 bg-green-50 text-green-700 rounded-xl cursor-pointer font-medium"><i data-lucide="home" class="w-5 h-5"></i><span class="hidden lg:block">Home</span></div>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 p-12">
+                            <div class="hotspot solution top-[200px] left-[400px] hidden" onclick="showInsight('solution', 'The Smart Resume', 'Instead of a list of courses, we show ONE card pointing to the exact timestamp where they left off.')">?</div>
+                            
+                            <div class="flex justify-between items-end mb-10">
+                                <div>
+                                    <h1 class="text-4xl font-extrabold text-slate-900 mb-2">Welcome back! 👋</h1>
+                                    <p class="text-slate-500 text-lg">It's been a busy week. Let's get your momentum back with a <strong>5-minute win</strong>.</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 overflow-hidden flex flex-col md:flex-row mb-10 relative group hover:-translate-y-1 transition-transform cursor-pointer" onclick="setStage(4)">
+                                <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
+                                <div class="md:w-5/12 bg-slate-900 relative min-h-[250px] overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800" class="absolute inset-0 w-full h-full object-cover opacity-60">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center"><i data-lucide="play" class="w-6 h-6 text-white fill-current ml-1"></i></div>
+                                    </div>
+                                    <div class="absolute bottom-4 left-4 bg-black/60 backdrop-blur text-white text-xs font-mono px-2 py-1 rounded">Stopped at 04:12</div>
+                                </div>
+
+                                <div class="md:w-7/12 p-10 flex flex-col justify-center">
+                                    <div class="text-xs font-bold text-green-600 uppercase tracking-wide mb-2">Pick up where you left off</div>
+                                    <h3 class="text-2xl font-bold text-slate-900 mb-2">Advanced Python: Generators</h3>
+                                    <p class="text-slate-500 mb-8">You only have <strong>8 minutes</strong> left in this lesson.</p>
+                                    <button class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-green-200 w-max flex items-center space-x-2">
+                                        <i data-lucide="play-circle" class="w-5 h-5"></i><span>Resume Lesson</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            4: { // Player
+                problemHTML: `
+                    <div class="flex flex-col h-full fade-in bg-slate-900 text-white">
+                        <div class="hotspot top-[50%] left-[40%] hidden" onclick="showInsight('problem', 'The Endless Tunnel', 'A 55-minute solid bar with no breaks is intimidating. Students often quit because they don\\'t feel they can commit.')">?</div>
+                        <div class="h-16 bg-slate-800 flex items-center px-6 border-b border-slate-700">
+                             <button onclick="setStage(3)" class="mr-4"><i data-lucide="arrow-left"></i></button>
+                             <span class="font-medium">Deep Dive into Algorithms</span>
+                        </div>
+                        <div class="flex-1 flex flex-col justify-center items-center bg-black relative p-10">
+                            <div class="w-full max-w-4xl aspect-video bg-slate-800 relative flex items-center justify-center rounded-lg shadow-2xl">
+                                <i data-lucide="play" class="w-20 h-20 text-white/50"></i>
+                                <div class="absolute bottom-0 left-0 w-full h-2 bg-slate-700"><div class="w-[5%] h-full bg-red-600"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                solutionHTML: `
+                    <div class="flex flex-col h-full fade-in bg-slate-50">
+                        <div class="h-16 bg-white flex items-center px-8 border-b border-slate-200 justify-between">
+                            <div class="flex items-center">
+                                <button onclick="setStage(3)" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center mr-4 hover:bg-slate-200"><i data-lucide="arrow-left" class="w-4 h-4 text-slate-600"></i></button>
+                                <span class="font-bold text-slate-800">Deep Dive into Algorithms</span>
+                            </div>
+                            <div class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center"><i data-lucide="flame" class="w-3 h-3 mr-1"></i> Streak Active</div>
+                        </div>
+
+                        <div class="flex-1 flex overflow-hidden">
+                            <div class="flex-1 bg-slate-900 flex flex-col justify-center items-center relative p-8">
+                                <div class="hotspot solution bottom-[100px] left-[10%] hidden" onclick="showInsight('solution', 'Visual Milestones', 'We break the video into chunks. Seeing \\'Next Checkpoint: 3 mins\\' encourages the user to keep going.')">?</div>
+                                <div class="w-full max-w-5xl aspect-video bg-black relative rounded-xl shadow-2xl overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?auto=format&fit=crop&w=1200" class="absolute inset-0 w-full h-full object-cover opacity-50">
+                                    <div class="absolute inset-0 flex items-center justify-center"><button class="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="pause" class="w-8 h-8 text-white fill-current"></i></button></div>
+                                    <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent">
+                                        <div class="flex justify-between text-xs font-bold text-white mb-2"><span>Intro</span><span class="text-green-400">Next Checkpoint: 3 mins</span></div>
+                                        <div class="flex space-x-1 h-2 w-full">
+                                            <div class="flex-1 bg-green-500 rounded-l-full"></div>
+                                            <div class="flex-1 bg-white/30 rounded-r-full relative"><div class="absolute top-0 left-0 h-full bg-white w-[40%]"></div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // --- STATE & RENDER LOGIC ---
+        let currentStage = 0; // Start at Landing Page
+        let isSolutionMode = false;
+        let showHotspots = false;
+        let magicLinkSent = false;
+
+        const viewport = document.getElementById('app-viewport');
+        const modeCheckbox = document.getElementById('ux-mode-toggle');
+        const hotspotCheckbox = document.getElementById('hotspot-toggle');
+        const modal = document.getElementById('insight-modal');
+
+        function render() {
+            let content = "";
+            
+            // Special handling for Login Solution (Stage 2) + Magic Link Sent state
+            if (currentStage === 2 && isSolutionMode) {
+                if (!magicLinkSent) {
+                    // Standard Login Screen
+                    content = `
+                    <div class="flex items-center justify-center min-h-full fade-in bg-slate-50">
+                        <div class="hotspot solution top-[30%] right-[35%] hidden" onclick="showInsight('solution', 'Frictionless Magic Link', 'We remove the password barrier entirely. A \\'Magic Link\\' feels like a concierge service opening the door for them.')">?</div>
+                        
+                        <div class="bg-white w-full max-w-md p-12 rounded-2xl shadow-xl border border-slate-100 text-center relative overflow-hidden">
+                             <div class="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
+                            
+                            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i data-lucide="sparkles" class="w-10 h-10 text-green-600"></i>
+                            </div>
+                            
+                            <h2 class="text-3xl font-bold text-slate-900 mb-2">Welcome back!</h2>
+                            <p class="text-slate-500 mb-8">We saved your progress in <strong>Python 101</strong>.</p>
+                            
+                            <div class="space-y-4">
+                                <button onclick="setStage(3)" class="w-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center space-x-3 transition-colors">
+                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
+                                    <span>Continue with Google</span>
+                                </button>
+                                <button onclick="triggerMagicLink()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-colors">
+                                    Email me a Magic Link
+                                </button>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-6">No password required.</p>
+                        </div>
+                    </div>`;
+                } else {
+                    // Magic Link Sent Screen
+                    content = `
+                    <div class="flex items-center justify-center min-h-full fade-in bg-slate-50">
+                        <div class="bg-white w-full max-w-md p-12 rounded-2xl shadow-xl border border-slate-100 text-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
+                            
+                            <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                                <i data-lucide="mail" class="w-10 h-10 text-blue-500"></i>
+                            </div>
+                            
+                            <h2 class="text-2xl font-bold text-slate-900 mb-2">Check your inbox!</h2>
+                            <p class="text-slate-500 mb-8">We sent a secure link to <strong>alex@university.edu</strong>.</p>
+                            
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 text-sm text-slate-600">
+                                <p class="mb-2 font-bold">Simulation Controls:</p>
+                                <button onclick="simulateLinkClick()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                                    <i data-lucide="mouse-pointer-2" class="w-4 h-4"></i>
+                                    <span>Simulate Clicking Link</span>
+                                </button>
+                            </div>
+                            
+                            <button onclick="magicLinkSent=false; render()" class="text-slate-400 text-xs hover:text-slate-600 underline">Use a different email</button>
+                        </div>
+                    </div>`;
+                }
+            } else {
+                // Standard Rendering
+                content = isSolutionMode 
+                    ? stages[currentStage].solutionHTML 
+                    : stages[currentStage].problemHTML;
+            }
+
+            viewport.innerHTML = content;
+
+            // Nav Styles
+            document.querySelectorAll('.nav-item').forEach((btn, idx) => {
+                if (idx === currentStage) {
+                    btn.classList.add('active', 'text-violet-700');
+                    btn.classList.remove('text-slate-500');
+                } else {
+                    btn.classList.remove('active', 'text-violet-700');
+                    btn.classList.add('text-slate-500');
+                }
+            });
+
+            // Re-run icons
+            lucide.createIcons();
+            
+            // Hotspots
+            updateHotspotVisibility();
+        }
+
+        // --- EVENTS ---
+        function setStage(n) {
+            currentStage = n;
+            magicLinkSent = false; // Reset magic link state on nav change
+            render();
+        }
+
+        function triggerMagicLink() {
+            magicLinkSent = true;
+            render();
+        }
+
+        function simulateLinkClick() {
+            // Reset for next time
+            magicLinkSent = false;
+            // Go to dashboard
+            setStage(3);
+        }
+
+        modeCheckbox.addEventListener('change', (e) => {
+            isSolutionMode = e.target.checked;
+            render();
+        });
+
+        hotspotCheckbox.addEventListener('change', (e) => {
+            showHotspots = e.target.checked;
+            updateHotspotVisibility();
+        });
+
+        function updateHotspotVisibility() {
+            const spots = document.querySelectorAll('.hotspot');
+            spots.forEach(spot => {
+                if(showHotspots) spot.classList.remove('hidden');
+                else spot.classList.add('hidden');
+            });
+        }
+
+        // --- INTERACTION LOGIC ---
+        window.selectGoal = function(card, goalName) {
+            const allCards = card.parentElement.children;
+            for(let c of allCards) {
+                c.classList.remove('ring-4', 'ring-green-100', 'border-green-500', 'scale-[1.02]');
+                c.classList.add('opacity-50', 'scale-95');
+            }
+            card.classList.remove('opacity-50', 'scale-95');
+            card.classList.add('ring-4', 'ring-green-100', 'border-green-500', 'scale-[1.02]');
+            
+            const bar = document.getElementById('commitment-bar');
+            const text = document.getElementById('selected-goal-text');
+            text.textContent = goalName;
+            bar.classList.remove('translate-y-10', 'opacity-0');
+        }
+
+        // --- MODAL ---
+        window.showInsight = function(type, title, desc) {
+            const tag = document.getElementById('modal-tag');
+            tag.textContent = type === 'problem' ? 'The Friction' : 'The Solution';
+            tag.className = type === 'problem' 
+                ? 'text-xs font-bold px-3 py-1 rounded-full uppercase bg-red-100 text-red-600'
+                : 'text-xs font-bold px-3 py-1 rounded-full uppercase bg-green-100 text-green-600';
+
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-desc').textContent = desc;
+            modal.classList.remove('hidden');
+        }
+
+        window.closeModal = function() {
+            modal.classList.add('hidden');
+        }
+
+        // Init
+        render();
+
+    </script>
+</body>
+</html>

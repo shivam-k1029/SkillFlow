@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillFlow - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- UX EXPLAINER -->
+    <div class="fixed top-4 right-4 z-50 flex items-center space-x-2 bg-white/90 backdrop-blur p-2 rounded-lg border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Explain UX</span>
+        <input type="checkbox" id="hotspot-toggle" class="w-4 h-4 accent-green-600 cursor-pointer" onchange="toggleHotspots(this)">
+    </div>
+
+    <!-- HOTSPOT -->
+    <div class="hotspot hidden absolute top-[30%] right-[35%] w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer animate-pulse z-40 shadow-[0_0_0_10px_rgba(34,197,94,0.2)]" onclick="alert('UX INSIGHT: Frictionless Magic Link.\n\nProblem: Forgotten passwords cause drop-off.\nSolution: Magic Links act as a concierge service, removing the possibility of user error.')">?</div>
+
+    <!-- STATE 1: LOGIN FORM -->
+    <div id="login-view" class="bg-white w-full max-w-md p-12 rounded-2xl shadow-xl border border-slate-100 text-center relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
+        
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="sparkles" class="w-10 h-10 text-green-600"></i>
+        </div>
+        
+        <h2 class="text-3xl font-bold text-slate-900 mb-2">Welcome back!</h2>
+        <p class="text-slate-500 mb-8">We saved your progress in <strong>Python 101</strong>.</p>
+        
+        <div class="space-y-4">
+            <button onclick="window.location.href='dashboard.html'" class="w-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center space-x-3 transition-colors">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
+                <span>Continue with Google</span>
+            </button>
+            <button onclick="showSentView()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-colors">
+                Email me a Magic Link
+            </button>
+        </div>
+        <p class="text-xs text-slate-400 mt-6">No password required.</p>
+    </div>
+
+    <!-- STATE 2: MAGIC LINK SENT -->
+    <div id="sent-view" class="hidden bg-white w-full max-w-md p-12 rounded-2xl shadow-xl border border-slate-100 text-center relative overflow-hidden fade-in">
+        <div class="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
+        
+        <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+            <i data-lucide="mail" class="w-10 h-10 text-blue-500"></i>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-slate-900 mb-2">Check your inbox!</h2>
+        <p class="text-slate-500 mb-8">We sent a secure link to <strong>alex@university.edu</strong>.</p>
+        
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 text-sm text-slate-600">
+            <p class="mb-2 font-bold">Simulation Controls:</p>
+            <button onclick="window.location.href='dashboard.html'" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                <i data-lucide="mouse-pointer-2" class="w-4 h-4"></i>
+                <span>Simulate Clicking Link</span>
+            </button>
+        </div>
+        
+        <button onclick="location.reload()" class="text-slate-400 text-xs hover:text-slate-600 underline">Use a different email</button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        function toggleHotspots(cb) {
+            const el = document.querySelector('.hotspot');
+            if(cb.checked) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+        function showSentView() {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('sent-view').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
